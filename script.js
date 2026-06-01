@@ -122,8 +122,9 @@ class Confetti {
     }
 }
 
-// Populate background particles
-for (let i = 0; i < 70; i++) {
+// Populate background particles (fewer on mobile for 60fps fluidity)
+const particleCount = window.innerWidth < 768 ? 30 : 70;
+for (let i = 0; i < particleCount; i++) {
     particles.push(new Particle());
 }
 

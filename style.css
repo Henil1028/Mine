@@ -813,17 +813,24 @@ body {
    ========================================================================== */
 @media (max-width: 768px) {
     .glass-nav {
-        padding: 0 4%;
+        padding: 0 10px;
     }
     .nav-logo {
-        font-size: 1.15rem;
+        display: none !important; /* Hide logo on mobile to give links 100% screen space and prevent cropping */
     }
     .nav-links {
-        gap: 6px;
+        width: 100%;
+        display: flex;
+        justify-content: space-around;
+        gap: 5px;
     }
     .nav-link {
-        font-size: 0.78rem;
-        padding: 6px 10px;
+        font-size: 0.76rem;
+        padding: 8px 12px;
+        white-space: nowrap; /* Prevent tab text wrapping */
+        display: flex;
+        align-items: center;
+        gap: 6px;
     }
     .proposal-title {
         font-size: 1.85rem;
@@ -913,21 +920,12 @@ body {
     }
 }
 
-/* Extra small mobile adjustments */
-@media (max-width: 380px) {
-    .glass-nav {
-        padding: 0 2%;
-    }
-    .nav-logo {
-        display: none; /* Hide logo to make room for tabs on micro devices */
-    }
-    .nav-links {
-        width: 100%;
-        justify-content: space-around;
-    }
+/* Extra small mobile adjustments (viewports under 360px wide) */
+@media (max-width: 360px) {
     .nav-link {
-        font-size: 0.75rem;
-        padding: 5px 8px;
+        font-size: 0.70rem;
+        padding: 6px 8px;
+        gap: 4px;
     }
     .proposal-title {
         font-size: 1.6rem;

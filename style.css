@@ -695,6 +695,14 @@ body {
 
 .gallery-card-item {
     perspective: 1000px;
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+    transition: opacity 1.0s cubic-bezier(0.25, 0.8, 0.25, 1), transform 1.0s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.gallery-card-item.reveal {
+    opacity: 1;
+    transform: translateY(0) scale(1);
 }
 
 .card-inner {

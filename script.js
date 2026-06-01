@@ -211,6 +211,39 @@ function navigateToView(targetId) {
         }
     }
 
+    // Dynamic staggered card reveal for Memory Gallery
+    const cards = document.querySelectorAll('.gallery-card-item');
+    if (window.galleryTimers) {
+        window.galleryTimers.forEach(t => clearTimeout(t));
+    }
+    window.galleryTimers = [];
+
+    if (targetId === 'gallery') {
+        // Initially hide all cards
+        cards.forEach(card => card.classList.remove('reveal'));
+        
+        // Staggered reveal: Card 1 in 0.5s, then 1s delay for each subsequent card (1.5s, 2.5s, etc.)
+        cards.forEach((card, index) => {
+            const delay = 500 + index * 1000;
+            const timer = setTimeout(() => {
+                card.classList.add('reveal');
+                
+                // Micro stardust explosion at card center for a premium feeling!
+                const rect = card.getBoundingClientRect();
+                const x = rect.left + rect.width / 2;
+                const y = rect.top + rect.height / 2;
+                // Only burst if the card is inside active viewport bounds
+                if (x > 0 && x < window.innerWidth && y > 0 && y < window.innerHeight) {
+                    triggerConfettiBurst(x, y, 6);
+                }
+            }, delay);
+            window.galleryTimers.push(timer);
+        });
+    } else {
+        // Reset state so animations replay on next gallery view entry
+        cards.forEach(card => card.classList.remove('reveal'));
+    }
+
     // Auto scroll to top on screen swap
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }

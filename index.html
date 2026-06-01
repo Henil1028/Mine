@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our Special Journey | A Surprise for You</title>
+    <!-- Modern Typography: Montserrat (UI) & Playfair Display (Romantic Serif) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Sacramento&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Premium Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Premium Interactive Canvas Background -->
+    <canvas id="particles-canvas"></canvas>
+
+    <!-- Sticky Glassmorphic Navbar -->
+    <nav class="glass-nav">
+        <div class="nav-logo">
+            <span class="logo-heart">❤️</span> Our Story
+        </div>
+        <div class="nav-links">
+            <a href="#proposal" class="nav-link active" id="link-proposal">
+                <i class="fa-solid fa-heart-pulse"></i> The Question
+            </a>
+            <a href="#surprise" class="nav-link locked" id="link-surprise" title="Complete the proposal to unlock!">
+                <i class="fa-solid fa-gift" id="surprise-icon"></i> The Surprise
+            </a>
+            <a href="#gallery" class="nav-link" id="link-gallery">
+                <i class="fa-solid fa-images"></i> Memory Gallery
+            </a>
+        </div>
+    </nav>
+
+    <!-- Main Content Screens -->
+    <main class="app-container">
+        
+        <!-- SECTION 1: PROPOSAL VIEW -->
+        <section id="proposal" class="app-view active">
+            <div class="glass-card proposal-card">
+                <div class="card-glow"></div>
+                <div class="proposal-header">
+                    <div class="proposal-icon-wrapper">
+                        <i class="fa-solid fa-heart animate-beat"></i>
+                    </div>
+                    <h1 class="proposal-title">Hey Beautiful...</h1>
+                </div>
+                
+                <div class="proposal-body">
+                    <p class="proposal-text">
+                        Every single day spent with you has been a magical chapter in my life. You bring warmth, laughter, and an infinite amount of love into my world. 
+                    </p>
+                    <p class="proposal-question">
+                        Will you be my partner in all of life's beautiful adventures, today and forever?
+                    </p>
+                </div>
+                
+                <div class="proposal-actions">
+                    <button id="btn-yes" class="btn btn-yes glow-btn">
+                        <span class="btn-text">Yes, I Will!</span> <i class="fa-solid fa-heart-circle-check"></i>
+                    </button>
+                    <button id="btn-no" class="btn btn-no">
+                        <span class="btn-text">No</span> <i class="fa-solid fa-heart-crack"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 2: SURPRISE VIEW (LOCKED / UNLOCKED) -->
+        <section id="surprise" class="app-view hidden">
+            <!-- Locked State Screen -->
+            <div class="locked-container" id="surprise-locked">
+                <div class="glass-card locked-card">
+                    <i class="fa-solid fa-lock locked-icon"></i>
+                    <h2>A Secret Awaits...</h2>
+                    <p>This surprise box is sealed with love. You must answer the special question on the main screen to unlock it!</p>
+                    <button onclick="navigateToView('proposal')" class="btn btn-yes glow-btn">Go to The Question</button>
+                </div>
+            </div>
+
+            <!-- Unlocked State Screen -->
+            <div class="unlocked-container hidden" id="surprise-unlocked">
+                <h1 class="surprise-title Sacramento-font">For Your Eyes Only</h1>
+                <p class="surprise-subtitle">Click the golden gift box to open the surprise letter inside...</p>
+                
+                <div class="gift-scene">
+                    <div class="gift-box" id="main-gift-box">
+                        <!-- 3D Ribbon & Box faces -->
+                        <div class="box-lid">
+                            <div class="lid-face lid-top"></div>
+                            <div class="lid-face lid-front"></div>
+                            <div class="lid-face lid-back"></div>
+                            <div class="lid-face lid-left"></div>
+                            <div class="lid-face lid-right"></div>
+                        </div>
+                        <div class="box-body">
+                            <div class="body-face body-front"></div>
+                            <div class="body-face body-back"></div>
+                            <div class="body-face body-left"></div>
+                            <div class="body-face body-right"></div>
+                            <div class="body-face body-bottom"></div>
+                        </div>
+                        <!-- Sparkles and Ribbon Knot -->
+                        <div class="ribbon-knot"></div>
+                    </div>
+                </div>
+
+                <!-- Revealed Letter Container -->
+                <div class="letter-overlay hidden" id="letter-overlay">
+                    <div class="glass-card letter-card">
+                        <button class="close-letter" id="close-letter-btn">&times;</button>
+                        <div class="letter-header">
+                            <div class="letter-stamp">❤️</div>
+                            <h2 class="letter-date">June 1, 2026</h2>
+                        </div>
+                        <div class="letter-body">
+                            <h3 class="letter-salutation">My Wifey,</h3>
+                            <p>
+                                Sorry My Bacha bav gusso karyo me tara par I am sorry my bachu I Love You My Baby🩵🫂 maf kari de mari jaan🩵 Sorry kok var bav gusso karu chhu kai manto nathi taru tane heran karu chhu I am so sorry my baby thank you for coming in my life thank for support me game te thay mari jode j re chhe agal pan avi j rite maro sath apje hu always tari jode raish kyay nai jav tane muki ne I Love You Baby🩵🫂
+                            </p>
+                            <p>
+                                So surprise for you my baby click on the memory gallery
+                            </p>
+                            <p class="letter-signature">
+                                Yours completely,<br>
+                                <span class="signature-name">Your Special Someone</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3: IMAGE GALLERY -->
+        <section id="gallery" class="app-view hidden">
+            <div class="gallery-header-section">
+                <h1 class="gallery-main-title">Our Memory Lane</h1>
+                <p class="gallery-subtitle">A collection of beautiful milestones and cozy moments we share.</p>
+            </div>
+             <div class="gallery-grid">
+                <!-- CARD 1 -->
+                <div class="gallery-card-item">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="img3.jpg" alt="Starry Lantern Night" class="gallery-img">
+                            <div class="card-category">Love</div>
+                        </div>
+                        <div class="card-info">
+                            <h3 class="card-title">First Kiss</h3>
+                            <p class="card-desc">Like we togather and win our Life</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CARD 2 -->
+                <div class="gallery-card-item">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="img5.jpg" alt="Cozy Cafe Date" class="gallery-img">
+                            <div class="card-category">Also this selfies</div>
+                        </div>
+                        <div class="card-info">
+                            <h3 class="card-title">First time</h3>
+                            <p class="card-desc">That day we meet entire day in our Life</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CARD 3 -->
+                <div class="gallery-card-item">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="img6.jpg" alt="Beach Sunset Date" class="gallery-img">
+                            <div class="card-category">My Love</div>
+                        </div>
+                        <div class="card-info">
+                            <h3 class="card-title">My bachu</h3>
+                            <p class="card-desc">Hand to Hand and come closer</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CARD 4 -->
+                <div class="gallery-card-item">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="img2.jpg" alt="Autumn Park Walk" class="gallery-img">
+                            <div class="card-category">So</div>
+                        </div>
+                        <div class="card-info">
+                            <h3 class="card-title">My wifey</h3>
+                            <p class="card-desc">Falling in my arm and I fall in love with her more and more</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CARD 5 -->
+                <div class="gallery-card-item">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="img4.jpg" alt="Magical Winter Greenhouse" class="gallery-img">
+                            <div class="card-category">So</div>
+                        </div>
+                        <div class="card-info">
+                            <h3 class="card-title">The Moment</h3>
+                            <p class="card-desc">The moment we talk and that time take in our heart</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CARD 6 -->
+                <div class="gallery-card-item">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="img1.jpg" alt="Mountain Top Picnic" class="gallery-img">
+                            <div class="card-category">My Baby</div>
+                        </div>
+                        <div class="card-info">
+                            <h3 class="card-title">This time</h3>
+                            <p class="card-desc">With her I don't remember who I am</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CARD 7 (VIDEO 1) -->
+                <div class="gallery-card-item">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <video class="gallery-video" autoplay loop muted playsinline>
+                                <source src="video1.mp4" type="video/mp4">
+                                Your browser does not support the video tag.
+                            </video>
+                            <div class="card-category">Our time</div>
+                        </div>
+                        <div class="card-info">
+                            <h3 class="card-title">Lovely moment</h3>
+                            <p class="card-desc">At this time we both don't know anything only know our Love</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CARD 8 (VIDEO 2) -->
+                <div class="gallery-card-item">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <video class="gallery-video" autoplay loop muted playsinline>
+                                <source src="video2.mp4" type="video/mp4">
+                                Your browser does not support the video tag.
+                            </video>
+                            <div class="card-category">This time</div>
+                        </div>
+                        <div class="card-info">
+                            <h3 class="card-title">This moment</h3>
+                            <p class="card-desc">With my Baby</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Hidden native audio element (No visual poster, loop enabled) -->
+    <audio id="bg-audio" loop style="display: none;">
+        <source src="h.mp3" type="audio/mpeg">
+        <source src="music.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+
+    <!-- Custom Script -->
+    <script src="script.js"></script>
+</body>
+</html>

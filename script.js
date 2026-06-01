@@ -211,37 +211,11 @@ function navigateToView(targetId) {
         }
     }
 
-    // Dynamic staggered card reveal for Memory Gallery
-    const cards = document.querySelectorAll('.gallery-card-item');
-    if (window.galleryTimers) {
-        window.galleryTimers.forEach(t => clearTimeout(t));
-    }
-    window.galleryTimers = [];
-
+    // Slideshow Carousel Control for Memory Gallery
     if (targetId === 'gallery') {
-        // Initially hide all cards
-        cards.forEach(card => card.classList.remove('reveal'));
-        
-        // Staggered reveal: Card 1 instantly (0s), then exactly 1s delay for each subsequent card (1s, 2s, 3s, etc.)
-        cards.forEach((card, index) => {
-            const delay = index * 1000;
-            const timer = setTimeout(() => {
-                card.classList.add('reveal');
-                
-                // Micro stardust explosion at card center for a premium feeling!
-                const rect = card.getBoundingClientRect();
-                const x = rect.left + rect.width / 2;
-                const y = rect.top + rect.height / 2;
-                // Only burst if the card is inside active viewport bounds
-                if (x > 0 && x < window.innerWidth && y > 0 && y < window.innerHeight) {
-                    triggerConfettiBurst(x, y, 6);
-                }
-            }, delay);
-            window.galleryTimers.push(timer);
-        });
+        initSlideshow();
     } else {
-        // Reset state so animations replay on next gallery view entry
-        cards.forEach(card => card.classList.remove('reveal'));
+        pauseSlideshow();
     }
 
     // Auto scroll to top on screen swap
@@ -458,6 +432,8 @@ function openLightbox(index) {
     setTimeout(() => {
         lightbox.classList.add('show');
     }, 50);
+    // Pause background card slideshow autoplay when lightbox is opened
+    pauseSlideshow();
 }
 
 function updateLightboxMedia() {
@@ -576,4 +552,169 @@ document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') closeLightbox();
     }
 });
+
+/* ==========================================================================
+   PREMIUM CARD SLIDESHOW / CAROUSEL ENGINE
+   ========================================================================== */
+let slideshowIndex = 0;
+let slideshowTimer = null;
+let isSlideshowPlaying = true;
+const slideshowDelay = 1500; // Premium comfortable viewing interval
+
+function initSlideshow() {
+    const dotsContainer = document.getElementById('carousel-dots');
+    const carouselCards = document.querySelectorAll('.gallery-card-item');
+
+    if (dotsContainer && carouselCards.length > 0) {
+        dotsContainer.innerHTML = '';
+        carouselCards.forEach((_, idx) => {
+            const dot = document.createElement('div');
+            dot.className = `carousel-dot ${idx === 0 ? 'active' : ''}`;
+            dot.addEventListener('click', () => {
+                goToSlide(idx);
+                pauseSlideshow();
+            });
+            dotsContainer.appendChild(dot);
+        });
+    }
+
+    // Reset slideshow states
+    slideshowIndex = 0;
+    showSlide(0);
+    startSlideshow();
+}
+
+function showSlide(index) {
+    const carouselCards = document.querySelectorAll('.gallery-card-item');
+    if (carouselCards.length === 0) return;
+
+    const prevIndex = slideshowIndex;
+    slideshowIndex = (index + carouselCards.length) % carouselCards.length;
+    
+    carouselCards.forEach((card, idx) => {
+        card.classList.remove('active', 'leaving');
+        if (idx === slideshowIndex) {
+            card.classList.add('active');
+            
+            // Micro stardust sparkle explosion at card center!
+            const rect = card.getBoundingClientRect();
+            const x = rect.left + rect.width / 2;
+            const y = rect.top + rect.height / 2;
+            if (x > 0 && x < window.innerWidth && y > 0 && y < window.innerHeight) {
+                triggerConfettiBurst(x, y, 6);
+            }
+            
+            // Mute background proposal music when card contains video, play unmuted!
+            const video = card.querySelector('.gallery-video');
+            const nativeAudio = document.getElementById('bg-audio');
+            if (video) {
+                video.currentTime = 0;
+                video.muted = false; // Unmuted video in main slideshow
+                video.play().catch(e => console.log("Slideshow video play blocked: ", e));
+                
+                if (nativeAudio) {
+                    nativeAudio.pause();
+                }
+            } else {
+                // Resume background proposal music for image slides
+                if (nativeAudio && nativeAudio.paused && audioStarted) {
+                    nativeAudio.play().catch(err => console.log(err));
+                }
+            }
+        } else if (idx === prevIndex) {
+            card.classList.add('leaving');
+            
+            // Pause video on outgoing card
+            const video = card.querySelector('.gallery-video');
+            if (video) {
+                video.pause();
+            }
+        }
+    });
+    
+    // Update dots indicator active states
+    const dots = document.querySelectorAll('.carousel-dot');
+    dots.forEach((dot, idx) => {
+        dot.classList.toggle('active', idx === slideshowIndex);
+    });
+}
+
+function nextSlide() {
+    showSlide(slideshowIndex + 1);
+}
+
+function prevSlide() {
+    showSlide(slideshowIndex - 1);
+}
+
+function goToSlide(idx) {
+    showSlide(idx);
+}
+
+function startSlideshow() {
+    if (slideshowTimer) clearInterval(slideshowTimer);
+    isSlideshowPlaying = true;
+    updateSlideshowBtnUI();
+    slideshowTimer = setInterval(nextSlide, slideshowDelay);
+}
+
+function pauseSlideshow() {
+    if (slideshowTimer) clearInterval(slideshowTimer);
+    isSlideshowPlaying = false;
+    updateSlideshowBtnUI();
+}
+
+// Global hook to ensure other scripts can call pause
+window.pauseSlideshow = pauseSlideshow;
+
+function toggleSlideshow() {
+    if (isSlideshowPlaying) {
+        pauseSlideshow();
+    } else {
+        startSlideshow();
+    }
+}
+
+function updateSlideshowBtnUI() {
+    const btn = document.getElementById('btn-slideshow-toggle');
+    if (btn) {
+        if (isSlideshowPlaying) {
+            btn.innerHTML = `<i class="fa-solid fa-pause"></i> Pause Slideshow`;
+        } else {
+            btn.innerHTML = `<i class="fa-solid fa-play"></i> Play Slideshow`;
+        }
+    }
+}
+
+// Bind side button controllers
+const prevBtn = document.getElementById('carousel-prev-btn');
+const nextBtn = document.getElementById('carousel-next-btn');
+const toggleBtn = document.getElementById('btn-slideshow-toggle');
+
+if (prevBtn) prevBtn.addEventListener('click', () => { prevSlide(); pauseSlideshow(); });
+if (nextBtn) nextBtn.addEventListener('click', () => { nextSlide(); pauseSlideshow(); });
+if (toggleBtn) toggleBtn.addEventListener('click', toggleSlideshow);
+
+// Touch swipes for main carousel card on Galaxy A35 and smartphones
+const carouselWrapper = document.querySelector('.carousel-wrapper');
+if (carouselWrapper) {
+    let carStartX = 0;
+    let carEndX = 0;
+    
+    carouselWrapper.addEventListener('touchstart', (e) => {
+        carStartX = e.changedTouches[0].screenX;
+    }, { passive: true });
+    
+    carouselWrapper.addEventListener('touchend', (e) => {
+        carEndX = e.changedTouches[0].screenX;
+        const threshold = 55;
+        if (carEndX < carStartX - threshold) {
+            nextSlide();
+            pauseSlideshow(); // Pause autoplay when swiped manually
+        } else if (carEndX > carStartX + threshold) {
+            prevSlide();
+            pauseSlideshow();
+        }
+    }, { passive: true });
+}
 

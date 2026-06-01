@@ -222,9 +222,9 @@ function navigateToView(targetId) {
         // Initially hide all cards
         cards.forEach(card => card.classList.remove('reveal'));
         
-        // Staggered reveal: Card 1 in 0.5s, then 1s delay for each subsequent card (1.5s, 2.5s, etc.)
+        // Staggered reveal: Card 1 instantly (0s), then exactly 1s delay for each subsequent card (1s, 2s, 3s, etc.)
         cards.forEach((card, index) => {
-            const delay = 500 + index * 1000;
+            const delay = index * 1000;
             const timer = setTimeout(() => {
                 card.classList.add('reveal');
                 

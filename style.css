@@ -44,6 +44,7 @@ body {
     color: var(--text-main);
     font-family: var(--font-ui);
     min-height: 100vh;
+    min-height: 100dvh;
     display: flex;
     flex-direction: column;
     overflow-x: hidden;
@@ -167,6 +168,7 @@ body {
 .app-view {
     flex: 1;
     min-height: calc(100vh - var(--nav-height));
+    min-height: calc(100dvh - var(--nav-height));
     padding: 40px 5%;
     display: flex;
     flex-direction: column;
@@ -812,25 +814,46 @@ body {
    RESPONSIVENESS MEDIA QUERIES
    ========================================================================== */
 @media (max-width: 768px) {
+    :root {
+        --nav-height: 64px; /* Shorter top navigation height on mobile viewports */
+    }
     .glass-nav {
         padding: 0 10px;
+        height: var(--nav-height);
     }
     .nav-logo {
-        display: none !important; /* Hide logo on mobile to give links 100% screen space and prevent cropping */
+        display: none !important; /* Hide logo on mobile to prevent cropping */
+    }
+    .app-view {
+        padding: 20px 12px !important; /* Refined padding to avoid clipping on tall screens */
+    }
+    .glass-card {
+        padding: 24px 16px !important;
+        border-radius: 18px;
+        width: 95% !important;
+        max-width: 480px;
     }
     .nav-links {
         width: 100%;
         display: flex;
         justify-content: space-around;
-        gap: 5px;
+        gap: 2px;
     }
     .nav-link {
-        font-size: 0.76rem;
-        padding: 8px 12px;
-        white-space: nowrap; /* Prevent tab text wrapping */
-        display: flex;
-        align-items: center;
-        gap: 6px;
+        font-size: 0.68rem;
+        font-weight: 600;
+        letter-spacing: 0.3px;
+        padding: 6px 8px;
+        flex-direction: column; /* Stack icons above text for native app feel */
+        gap: 4px;
+        border-radius: 12px;
+        transition: var(--transition-smooth);
+        min-width: 80px;
+        text-align: center;
+        white-space: nowrap; /* Prevent horizontal wrapping */
+    }
+    .nav-link i {
+        font-size: 1.15rem; /* Larger tappable icon on mobile */
     }
     .proposal-title {
         font-size: 1.85rem;
@@ -841,7 +864,7 @@ body {
     }
     .proposal-actions {
         flex-direction: column;
-        gap: 15px;
+        gap: 12px;
         width: 100%;
     }
     .btn {
@@ -859,15 +882,15 @@ body {
         font-size: 3rem;
     }
     .gallery-main-title {
-        font-size: 2.1rem;
+        font-size: clamp(1.8rem, 6vw, 2.5rem);
     }
     .gallery-subtitle {
-        font-size: 0.95rem;
+        font-size: 0.92rem;
     }
     .gallery-grid {
         grid-template-columns: 1fr;
         gap: 24px;
-        padding: 0 10px;
+        padding: 0 5px;
     }
     
     /* 3D Gift Box Mobile Scale Optimization */
@@ -885,6 +908,7 @@ body {
     .letter-card {
         padding: 24px 18px !important;
         border-radius: 18px;
+        max-height: 80dvh !important; /* Dynamic scale for tall screens */
     }
     .letter-header {
         margin-bottom: 15px;
@@ -923,12 +947,217 @@ body {
 /* Extra small mobile adjustments (viewports under 360px wide) */
 @media (max-width: 360px) {
     .nav-link {
-        font-size: 0.70rem;
-        padding: 6px 8px;
-        gap: 4px;
+        font-size: 0.62rem;
+        padding: 4px 6px;
+        min-width: 70px;
+    }
+    .nav-link i {
+        font-size: 1rem;
     }
     .proposal-title {
         font-size: 1.6rem;
     }
 }
+
+/* ==========================================================================
+   PREMIUM GALLERY LIGHTBOX OVERLAY
+   ========================================================================== */
+.lightbox-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh;
+    background: rgba(5, 3, 12, 0.95);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    z-index: 15000;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    padding: 0 4%;
+}
+
+.lightbox-overlay.show {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.lightbox-content-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    max-width: 85%;
+    height: 100%;
+    position: relative;
+    padding: 40px 0;
+}
+
+.lightbox-content {
+    max-width: 100%;
+    max-height: 65vh;
+    max-height: 65dvh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6);
+    border: 1px solid var(--border-light);
+    background: #090615;
+    position: relative;
+}
+
+.lightbox-media-el {
+    max-width: 100%;
+    max-height: 65vh;
+    max-height: 65dvh;
+    object-fit: contain;
+    display: block;
+}
+
+.fade-in {
+    animation: fadeIn 0.4s ease forwards;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+/* Lightbox Navigation Buttons */
+.lightbox-nav {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #fff;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    transition: var(--transition-bounce);
+    z-index: 15100;
+}
+
+.lightbox-nav:hover {
+    background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--secondary)));
+    border-color: transparent;
+    transform: scale(1.1);
+    box-shadow: 0 0 15px rgba(255, 75, 139, 0.4);
+}
+
+.close-lightbox {
+    position: absolute;
+    top: 30px;
+    right: 4%;
+    background: none;
+    border: none;
+    color: #9CA3AF;
+    font-size: 2.5rem;
+    cursor: pointer;
+    transition: var(--transition-smooth);
+    z-index: 15200;
+}
+
+.close-lightbox:hover {
+    color: hsl(var(--primary));
+    transform: rotate(90deg) scale(1.1);
+}
+
+/* Captions card */
+.lightbox-caption {
+    margin-top: 25px;
+    text-align: center;
+    max-width: 600px;
+    background: var(--bg-card);
+    padding: 16px 24px;
+    border-radius: 18px;
+    border: 1px solid var(--border-light);
+    backdrop-filter: blur(10px);
+    width: 100%;
+}
+
+.lightbox-category {
+    color: hsl(var(--primary));
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    display: block;
+    margin-bottom: 6px;
+}
+
+.lightbox-title {
+    font-family: var(--font-serif);
+    font-size: 1.25rem;
+    color: #fff;
+    margin-bottom: 6px;
+}
+
+.lightbox-desc {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+}
+
+/* Lightbox Mobile Adjustments */
+@media (max-width: 768px) {
+    .lightbox-overlay {
+        padding: 0 10px;
+    }
+    
+    .lightbox-content-container {
+        max-width: 90%;
+        padding: 60px 0;
+    }
+    
+    .lightbox-content {
+        max-height: 52vh;
+        max-height: 52dvh;
+    }
+    
+    .lightbox-media-el {
+        max-height: 52vh;
+        max-height: 52dvh;
+    }
+    
+    .lightbox-nav {
+        width: 44px;
+        height: 44px;
+        font-size: 1rem;
+        background: rgba(9, 6, 21, 0.75);
+        backdrop-filter: blur(5px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    
+    .close-lightbox {
+        top: 15px;
+        right: 15px;
+        font-size: 2.2rem;
+    }
+    
+    .lightbox-caption {
+        padding: 12px 16px;
+        margin-top: 15px;
+        border-radius: 14px;
+    }
+    
+    .lightbox-title {
+        font-size: 1.1rem;
+    }
+    
+    .lightbox-desc {
+        font-size: 0.82rem;
+    }
+}
+
 

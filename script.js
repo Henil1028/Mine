@@ -225,7 +225,7 @@ document.querySelectorAll('.nav-link').forEach(link => {
 });
 
 /* ==========================================================================
-   EVASIVE "NO" BUTTON
+   EVASIVE "NO" BUTTON (SMART VIEWPORT BOUNDS)
    ========================================================================== */
 const btnNo = document.getElementById('btn-no');
 
@@ -238,37 +238,51 @@ function moveButtonRandomly(e) {
     const btnWidth = btnNo.offsetWidth;
     const btnHeight = btnNo.offsetHeight;
     
-    // Viewport size minus safe margin
-    const margin = 50;
-    const maxX = window.innerWidth - btnWidth - margin;
-    const maxY = window.innerHeight - btnHeight - margin;
+    // Viewport size minus safe margins and navbar padding
+    const isMobile = window.innerWidth < 768;
+    const navHeight = isMobile ? 64 : 75;
     
-    let newX = Math.random() * (maxX - margin) + margin;
-    let newY = Math.random() * (maxY - margin) + margin;
+    const marginX = 20;
+    const marginTop = navHeight + 20; // Safe area below top sticky navbar
+    const marginBottom = 20;
+    
+    const minX = marginX;
+    const maxX = window.innerWidth - btnWidth - marginX;
+    
+    const minY = marginTop;
+    const maxY = window.innerHeight - btnHeight - marginBottom;
+    
+    // Safety check for narrow screens
+    if (maxX <= minX || maxY <= minY) return;
 
-    // Get current cursor location to avoid teleporting directly onto cursor
-    const clientX = e.clientX || (e.touches && e.touches[0].clientX) || 0;
-    const clientY = e.clientY || (e.touches && e.touches[0].clientY) || 0;
+    let newX = Math.random() * (maxX - minX) + minX;
+    let newY = Math.random() * (maxY - minY) + minY;
+
+    // Get current touch/cursor location to avoid teleporting directly under it
+    const clientX = e.clientX || (e.touches && e.touches[0].clientX) || window.innerWidth / 2;
+    const clientY = e.clientY || (e.touches && e.touches[0].clientY) || window.innerHeight / 2;
 
     const distance = Math.hypot(newX - clientX, newY - clientY);
     
-    // If calculated coordinates are too close to mouse, nudge them away
-    if (distance < 150) {
-        newX = (newX + 250) % maxX;
-        newY = (newY + 250) % maxY;
+    // If calculated coordinates are too close to current interaction point, nudge them away
+    if (distance < 120) {
+        newX = (newX + 180);
+        if (newX > maxX) newX = minX + (newX % (maxX - minX));
+        newY = (newY + 180);
+        if (newY > maxY) newY = minY + (newY % (maxY - minY));
     }
 
     btnNo.style.left = `${newX}px`;
     btnNo.style.top = `${newY}px`;
     
-    // Spawn subtle red heart trail particles where the button was
+    // Spawn subtle red heart trail particles where the button was clicked/hovered
     triggerConfettiBurst(clientX, clientY, 8);
 }
 
 // Bind mouseenter and touchstart events
 btnNo.addEventListener('mouseenter', moveButtonRandomly);
 btnNo.addEventListener('touchstart', (e) => {
-    e.preventDefault(); // Prevent standard mobile clicks
+    e.preventDefault(); // Prevent standard mobile tap fires
     moveButtonRandomly(e);
 });
 
@@ -361,3 +375,172 @@ closeLetterBtn.addEventListener('click', () => {
         giftBox.classList.remove('open');
     }, 1000);
 });
+
+/* ==========================================================================
+   PREMIUM GALLERY LIGHTBOX SYSTEM (ONE BY ONE VIEW)
+   ========================================================================== */
+const galleryItems = document.querySelectorAll('.gallery-card-item');
+const lightbox = document.getElementById('gallery-lightbox');
+const lightboxContent = document.getElementById('lightbox-content');
+const lightboxCaption = document.getElementById('lightbox-caption');
+const lightboxPrev = document.getElementById('lightbox-prev-btn');
+const lightboxNext = document.getElementById('lightbox-next-btn');
+const closeLightboxBtn = document.getElementById('close-lightbox-btn');
+
+let currentGalleryIndex = 0;
+let mediaList = [];
+
+// Parse media elements and assign index click bindings
+galleryItems.forEach((item, index) => {
+    const img = item.querySelector('.gallery-img');
+    const video = item.querySelector('.gallery-video');
+    const title = item.querySelector('.card-title').innerText;
+    const desc = item.querySelector('.card-desc').innerText;
+    const category = item.querySelector('.card-category').innerText;
+    
+    let type = 'image';
+    let src = '';
+    
+    if (img) {
+        type = 'image';
+        src = img.getAttribute('src');
+    } else if (video) {
+        type = 'video';
+        const source = video.querySelector('source');
+        src = source ? source.getAttribute('src') : video.getAttribute('src');
+    }
+    
+    mediaList.push({ type, src, title, desc, category });
+    
+    // Open full-screen lightbox upon clicking any card item
+    item.addEventListener('click', () => {
+        openLightbox(index);
+    });
+});
+
+function openLightbox(index) {
+    currentGalleryIndex = index;
+    updateLightboxMedia();
+    lightbox.classList.remove('hidden');
+    setTimeout(() => {
+        lightbox.classList.add('show');
+    }, 50);
+}
+
+function updateLightboxMedia() {
+    const data = mediaList[currentGalleryIndex];
+    lightboxContent.innerHTML = '';
+    
+    const nativeAudio = document.getElementById('bg-audio');
+    
+    if (data.type === 'image') {
+        const imgEl = document.createElement('img');
+        imgEl.src = data.src;
+        imgEl.className = 'lightbox-media-el fade-in';
+        imgEl.alt = data.title;
+        lightboxContent.appendChild(imgEl);
+        
+        // If background music is paused (e.g. from previous video slide), resume it unmuted!
+        if (nativeAudio && nativeAudio.paused && audioStarted) {
+            nativeAudio.play().catch(err => console.log(err));
+        }
+    } else if (data.type === 'video') {
+        const vidEl = document.createElement('video');
+        vidEl.src = data.src;
+        vidEl.className = 'lightbox-media-el fade-in';
+        vidEl.controls = true;
+        vidEl.autoplay = true;
+        vidEl.playsInline = true;
+        vidEl.loop = true;
+        vidEl.muted = false; // Enable video volume so they can hear the video's custom sound!
+        lightboxContent.appendChild(vidEl);
+        
+        // Temporarily pause main background proposal song while memory video plays with audio
+        if (nativeAudio) {
+            nativeAudio.pause();
+        }
+    }
+    
+    // Populate card textual descriptors
+    lightboxCaption.innerHTML = `
+        <span class="lightbox-category">${data.category}</span>
+        <h3 class="lightbox-title">${data.title}</h3>
+        <p class="lightbox-desc">${data.desc}</p>
+    `;
+}
+
+function closeLightbox() {
+    lightbox.classList.remove('show');
+    
+    // Clear elements to stop media stream playing in the background
+    setTimeout(() => {
+        lightboxContent.innerHTML = '';
+        lightbox.classList.add('hidden');
+    }, 400);
+    
+    // Resume background proposal music unmuted if we're still looking at the gallery
+    const nativeAudio = document.getElementById('bg-audio');
+    if (nativeAudio && nativeAudio.paused && audioStarted) {
+        nativeAudio.play().catch(err => console.log(err));
+    }
+}
+
+function nextMedia() {
+    currentGalleryIndex = (currentGalleryIndex + 1) % mediaList.length;
+    updateLightboxMedia();
+}
+
+function prevMedia() {
+    currentGalleryIndex = (currentGalleryIndex - 1 + mediaList.length) % mediaList.length;
+    updateLightboxMedia();
+}
+
+// Button triggers
+closeLightboxBtn.addEventListener('click', closeLightbox);
+lightboxNext.addEventListener('click', (e) => {
+    e.stopPropagation(); // Avoid outer-wrap backdrop closures
+    nextMedia();
+});
+lightboxPrev.addEventListener('click', (e) => {
+    e.stopPropagation();
+    prevMedia();
+});
+
+// Click outside media container boundaries to close modal
+lightbox.addEventListener('click', (e) => {
+    if (e.target === lightbox || e.target.classList.contains('lightbox-content-container')) {
+        closeLightbox();
+    }
+});
+
+// Swipe gestures for Galaxy A35 and responsive smartphones
+let touchStartX = 0;
+let touchEndX = 0;
+
+lightbox.addEventListener('touchstart', (e) => {
+    touchStartX = e.changedTouches[0].screenX;
+}, { passive: true });
+
+lightbox.addEventListener('touchend', (e) => {
+    touchEndX = e.changedTouches[0].screenX;
+    handleSwipeGesture();
+}, { passive: true });
+
+function handleSwipeGesture() {
+    const swipeThreshold = 55;
+    if (touchEndX < touchStartX - swipeThreshold) {
+        nextMedia(); // Swiped Left -> Load next element
+    } else if (touchEndX > touchStartX + swipeThreshold) {
+        prevMedia(); // Swiped Right -> Load previous element
+    }
+}
+
+// Arrow Key Bindings
+document.addEventListener('keydown', (e) => {
+    if (lightbox.classList.contains('show')) {
+        if (e.key === 'ArrowRight') nextMedia();
+        if (e.key === 'ArrowLeft') prevMedia();
+        if (e.key === 'Escape') closeLightbox();
+    }
+});
+
